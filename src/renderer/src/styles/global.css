@@ -349,7 +349,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   align-items: center;
   gap: 12px;
   text-align: center;
-  max-width: 340px;
+  max-width: 380px;
+  width: 100%;
 }
 
 .welcome-logo {
@@ -381,6 +382,172 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   font-size: 11px !important;
   color: var(--text-dim) !important;
   margin-top: 8px;
+}
+
+/* ── Content zoom ───────────────────────────────────────── */
+.markdown-body { zoom: var(--content-zoom, 1); }
+
+/* ── Find bar ───────────────────────────────────────────── */
+.content-area { position: relative; }
+
+.find-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-right: none;
+  border-radius: 0 0 0 8px;
+  box-shadow: -2px 2px 10px rgba(0,0,0,0.18);
+  z-index: 100;
+}
+
+.find-input {
+  width: 200px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+.find-input:focus { border-color: var(--accent); }
+
+.find-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 52px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: background 0.1s, color 0.1s;
+}
+.find-nav-btn:hover { background: var(--bg-hover); color: var(--text); }
+
+.find-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  transition: background 0.1s, color 0.1s;
+}
+.find-close-btn:hover { background: var(--bg-hover); color: var(--text); }
+
+/* ── Zoom controls ──────────────────────────────────────── */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.zoom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.1s, color 0.1s;
+}
+.zoom-btn:hover { background: var(--bg-hover); color: var(--text); }
+
+.zoom-label {
+  padding: 0 4px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 36px;
+  text-align: center;
+  transition: background 0.1s, color 0.1s;
+}
+.zoom-label:hover { background: var(--bg-hover); color: var(--text); }
+
+/* ── Recent files (welcome screen) ─────────────────────── */
+.recent-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+}
+
+.recent-heading {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  padding: 0 6px 6px;
+  text-align: left;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  text-align: left;
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: background 0.1s;
+}
+.recent-item:hover { background: var(--bg-hover); color: var(--text); }
+
+.recent-item-name {
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.recent-item-path {
+  font-size: 10px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  direction: rtl;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+/* ── Print / PDF export ─────────────────────────────────── */
+@media print {
+  .toolbar, .sidebar, .toc, .find-bar, .copy-btn { display: none !important; }
+  .app-shell, .app-body { display: block; height: auto; overflow: visible; }
+  .content-area, .markdown-scroll { overflow: visible; padding: 0; }
 }
 
 /* ── Code block copy button ─────────────────────────────── */

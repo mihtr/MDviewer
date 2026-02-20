@@ -38,8 +38,11 @@ export function Sidebar({
         </span>
       </div>
       <div className="sidebar-list">
-        {sorted.length === 0 && (
-          <p className="sidebar-empty">No files found</p>
+        {fileTree.length === 0 && (
+          <p className="sidebar-empty">This folder is empty</p>
+        )}
+        {fileTree.length > 0 && !fileTree.some(n => n.isDirectory || isMarkdown(n.name)) && (
+          <p className="sidebar-empty" style={{ marginBottom: 4 }}>No Markdown files here</p>
         )}
         {sorted.map((node) => (
           <SidebarEntry

@@ -29,9 +29,9 @@ describe('Sidebar', () => {
     expect(screen.getByText('docs')).toBeInTheDocument()
   })
 
-  it('shows "No files found" when the tree is empty', () => {
+  it('shows "This folder is empty" when the tree is empty', () => {
     render(<Sidebar {...defaultProps} fileTree={[]} />)
-    expect(screen.getByText('No files found')).toBeInTheDocument()
+    expect(screen.getByText('This folder is empty')).toBeInTheDocument()
   })
 
   it('renders file entries', () => {

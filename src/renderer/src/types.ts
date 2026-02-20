@@ -16,3 +16,10 @@ export interface Heading {
   text: string
   level: number
 }
+
+export interface RecentEntry {
+  path: string
+  name: string
+  type: 'file' | 'directory'
+  openedAt: number
+}

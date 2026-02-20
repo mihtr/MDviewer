@@ -17,10 +17,10 @@
 
 ## High-Value Features
 
-- [ ] **Recent files** — persist a short list of recently opened files/folders between sessions (`localStorage` or `app.getPath('userData')`)
-- [ ] **Find in file** — `Ctrl+F` to search within the rendered document with match highlighting and scroll
-- [ ] **Scroll position memory** — remember scroll position per file path; restore when switching back
-- [ ] **Keyboard shortcuts** — `Ctrl+O` open file, `Ctrl+Shift+O` open folder, `Ctrl+\` toggle sidebar, `Ctrl+Shift+T` toggle TOC
+- [x] **Recent files** — persist a short list of recently opened files/folders between sessions (`localStorage` or `app.getPath('userData')`)
+- [x] **Find in file** — `Ctrl+F` to search within the rendered document with match highlighting and scroll
+- [x] **Scroll position memory** — remember scroll position per file path; restore when switching back
+- [x] **Keyboard shortcuts** — `Ctrl+O` open file, `Ctrl+Shift+O` open folder, `Ctrl+\` toggle sidebar, `Ctrl+Shift+T` toggle TOC
 
 ## Rendering Enhancements
 
@@ -30,10 +30,10 @@
 
 ## Polish
 
-- [ ] **Print / export to PDF** — `webContents.printToPDF()` via IPC
-- [ ] **Zoom controls** — `Ctrl++` / `Ctrl+-` to adjust font size
-- [ ] **Window title** — update to show the open filename instead of always "MDviewer"
-- [ ] **Empty sidebar message** — distinguish "folder is empty" from "folder has no markdown files"
+- [x] **Print / export to PDF** — `webContents.printToPDF()` via IPC
+- [x] **Zoom controls** — `Ctrl++` / `Ctrl+-` to adjust font size
+- [x] **Window title** — update to show the open filename instead of always "MDviewer"
+- [x] **Empty sidebar message** — distinguish "folder is empty" from "folder has no markdown files"
 
 ## Known Limitations
 

@@ -26,3 +26,24 @@ export function resolveImageSrc(src: string | undefined, basePath: string | null
 export function parentDir(filePath: string): string {
   return filePath.replace(/[\\/][^\\/]+$/, '')
 }
+
+// ── Recent files (localStorage) ──────────────────────────────
+
+import type { RecentEntry } from './types'
+
+const RECENT_KEY = 'mdviewer-recent'
+const RECENT_MAX = 10
+
+export function getRecent(): RecentEntry[] {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]')
+  } catch {
+    return []
+  }
+}
+
+export function addRecent(entry: Omit<RecentEntry, 'openedAt'>): void {
+  const items = getRecent().filter(e => e.path !== entry.path)
+  items.unshift({ ...entry, openedAt: Date.now() })
+  localStorage.setItem(RECENT_KEY, JSON.stringify(items.slice(0, RECENT_MAX)))
+}

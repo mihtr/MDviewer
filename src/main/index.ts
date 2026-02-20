@@ -1,12 +1,13 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'path'
-import { readFileSync, readdirSync, statSync, watchFile, unwatchFile, watch } from 'fs'
+import { readFileSync, readdirSync, statSync, watchFile, unwatchFile, watch, writeFileSync } from 'fs'
 import type { FSWatcher } from 'fs'
 
 let mainWindow: BrowserWindow | null = null
 let watchedFilePath: string | null = null
 let dirWatcher: FSWatcher | null = null
 let dirDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let lastFindText = ''
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -32,6 +33,10 @@ function createWindow(): void {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
     return { action: 'deny' }
+  })
+
+  mainWindow.webContents.on('found-in-page', (_event, result) => {
+    mainWindow?.webContents.send('find:result', result)
   })
 
   if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
@@ -162,4 +167,31 @@ ipcMain.handle('fs:unwatchDirectory', () => {
     dirWatcher.close()
     dirWatcher = null
   }
+})
+
+// IPC: Find in page
+ipcMain.handle('find:inPage', (_event, text: string, forward: boolean) => {
+  if (!mainWindow) return
+  const isNew = text !== lastFindText
+  lastFindText = text
+  mainWindow.webContents.findInPage(text, { forward, findNext: !isNew })
+})
+
+ipcMain.handle('find:stop', () => {
+  mainWindow?.webContents.stopFindInPage('clearSelection')
+  lastFindText = ''
+})
+
+// IPC: Export to PDF
+ipcMain.handle('print:toPDF', async () => {
+  if (!mainWindow) return
+  const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+    title: 'Export to PDF',
+    defaultPath: 'document.pdf',
+    filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+  })
+  if (canceled || !filePath) return
+  const data = await mainWindow.webContents.printToPDF({ printBackground: true })
+  writeFileSync(filePath, data)
+  shell.openPath(filePath)
 })

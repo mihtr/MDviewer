@@ -29,6 +29,10 @@ export interface ElectronAPI {
   watchDirectory: (dirPath: string) => Promise<void>
   unwatchDirectory: () => Promise<void>
   onDirChanged: (callback: (data: { path: string }) => void) => () => void
+  findInPage: (text: string, forward: boolean) => Promise<void>
+  stopFind: () => Promise<void>
+  onFindResult: (callback: (result: { activeMatchOrdinal: number; matches: number }) => void) => () => void
+  printToPDF: () => Promise<void>
 }
 
 const api: ElectronAPI = {
@@ -49,7 +53,15 @@ const api: ElectronAPI = {
     const handler = (_event: Electron.IpcRendererEvent, data: { path: string }): void => callback(data)
     ipcRenderer.on('fs:dirChanged', handler)
     return () => ipcRenderer.removeListener('fs:dirChanged', handler)
-  }
+  },
+  findInPage: (text, forward) => ipcRenderer.invoke('find:inPage', text, forward),
+  stopFind: () => ipcRenderer.invoke('find:stop'),
+  onFindResult: (callback) => {
+    const handler = (_event: Electron.IpcRendererEvent, result: { activeMatchOrdinal: number; matches: number }): void => callback(result)
+    ipcRenderer.on('find:result', handler)
+    return () => ipcRenderer.removeListener('find:result', handler)
+  },
+  printToPDF: () => ipcRenderer.invoke('print:toPDF')
 }
 
 contextBridge.exposeInMainWorld('api', api)
