@@ -42,25 +42,25 @@ test('toolbar is visible', async () => {
 })
 
 test('drag-and-drop renders a markdown file', async () => {
-  // Write a temp markdown file
   const dir = join(tmpdir(), 'mdviewer-e2e')
   mkdirSync(dir, { recursive: true })
   const filePath = join(dir, 'test.md')
   writeFileSync(filePath, '# E2E Test\n\nThis is a test file.')
 
-  // Simulate drop via Electron's evaluate (bypasses native dialog)
-  await app.evaluate(({ ipcMain }, path) => {
-    const win = require('electron').BrowserWindow.getAllWindows()[0]
-    // Directly invoke the readFile handler and send result to renderer
-    ipcMain.emit('test:loadFile', { sender: win.webContents }, path)
-  }, filePath)
-
-  // Alternatively, test via IPC directly:
+  // Dispatch a synthetic drop event in the renderer with the file's native path.
+  // Electron adds a .path property to File objects during real drops; we replicate that here.
   await win.evaluate((path: string) => {
-    return window.api.readFile(path)
+    const file = new File(['# E2E Test\n\nThis is a test file.'], 'test.md', { type: 'text/markdown' })
+    Object.defineProperty(file, 'path', { value: path, writable: false })
+    const dt = new DataTransfer()
+    dt.items.add(file)
+    const event = new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true })
+    document.querySelector('.app-shell')!.dispatchEvent(event)
   }, filePath)
 
-  // Clean up
+  await expect(win.locator('.markdown-body')).toBeVisible({ timeout: 5000 })
+  await expect(win.locator('.markdown-body h1')).toHaveText('E2E Test')
+
   rmSync(dir, { recursive: true, force: true })
 })
 
