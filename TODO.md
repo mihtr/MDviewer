@@ -1,5 +1,13 @@
 # MDviewer — TODO & Improvement Suggestions
 
+## v1.0.1 — 2026-02-20
+### fix: bug fixes, tests, and sidebar/image improvements
+- Fix sidebar nested entries never showing active highlight
+- Fix relative images not rendering (resolve to file:// URL)
+- Implement drag-and-drop to open .md files
+- Add live sidebar refresh via fs.watch on current directory
+- Add unit, component, and e2e test suite (57 + 7 tests)
+
 ## Bugs
 
 - [x] **Sidebar active highlight** — nested entries compared `child.path === node.path` instead of `currentFilePath`
