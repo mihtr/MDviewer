@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import type { FileNode } from '../types'
-
-const MD_EXTENSIONS = new Set(['.md', '.markdown', '.mdx', '.txt'])
-
-function isMarkdown(name: string): boolean {
-  const ext = name.slice(name.lastIndexOf('.'))
-  return MD_EXTENSIONS.has(ext.toLowerCase())
-}
+import { isMarkdown } from '../utils'
 
 interface SidebarProps {
   fileTree: FileNode[]

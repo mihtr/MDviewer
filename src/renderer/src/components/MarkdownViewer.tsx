@@ -6,20 +6,12 @@ import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
 import type { Components } from 'react-markdown'
 import type { Heading } from '../types'
+import { resolveImageSrc } from '../utils'
 
 interface MarkdownViewerProps {
   content: string
   basePath: string | null
   onHeadingsExtracted: (headings: Heading[]) => void
-}
-
-function resolveImageSrc(src: string | undefined, basePath: string | null): string {
-  if (!src) return ''
-  if (/^(https?|file|data):/.test(src)) return src
-  if (!basePath) return src
-  const base = basePath.replace(/\\/g, '/')
-  const rel = src.replace(/\\/g, '/')
-  return `file:///${base}/${rel}`
 }
 
 export function MarkdownViewer({ content, basePath, onHeadingsExtracted }: MarkdownViewerProps): JSX.Element {
