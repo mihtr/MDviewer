@@ -1,9 +1,12 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'path'
-import { readFileSync, readdirSync, statSync, watchFile, unwatchFile } from 'fs'
+import { readFileSync, readdirSync, statSync, watchFile, unwatchFile, watch } from 'fs'
+import type { FSWatcher } from 'fs'
 
 let mainWindow: BrowserWindow | null = null
 let watchedFilePath: string | null = null
+let dirWatcher: FSWatcher | null = null
+let dirDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -130,5 +133,33 @@ ipcMain.handle('fs:unwatchFile', () => {
   if (watchedFilePath) {
     unwatchFile(watchedFilePath)
     watchedFilePath = null
+  }
+})
+
+// IPC: Watch a directory for file-system changes and notify renderer
+ipcMain.handle('fs:watchDirectory', (_event, dirPath: string) => {
+  if (dirWatcher) {
+    dirWatcher.close()
+    dirWatcher = null
+  }
+  try {
+    dirWatcher = watch(dirPath, () => {
+      if (dirDebounceTimer) clearTimeout(dirDebounceTimer)
+      dirDebounceTimer = setTimeout(() => {
+        mainWindow?.webContents.send('fs:dirChanged', { path: dirPath })
+      }, 250)
+    })
+    dirWatcher.on('error', () => {
+      dirWatcher = null
+    })
+  } catch {
+    // Directory may not be accessible
+  }
+})
+
+ipcMain.handle('fs:unwatchDirectory', () => {
+  if (dirWatcher) {
+    dirWatcher.close()
+    dirWatcher = null
   }
 })

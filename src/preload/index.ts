@@ -26,6 +26,9 @@ export interface ElectronAPI {
   watchFile: (filePath: string) => Promise<void>
   unwatchFile: () => Promise<void>
   onFileChanged: (callback: (data: FileResult) => void) => () => void
+  watchDirectory: (dirPath: string) => Promise<void>
+  unwatchDirectory: () => Promise<void>
+  onDirChanged: (callback: (data: { path: string }) => void) => () => void
 }
 
 const api: ElectronAPI = {
@@ -39,6 +42,13 @@ const api: ElectronAPI = {
     const handler = (_event: Electron.IpcRendererEvent, data: FileResult): void => callback(data)
     ipcRenderer.on('fs:fileChanged', handler)
     return () => ipcRenderer.removeListener('fs:fileChanged', handler)
+  },
+  watchDirectory: (dirPath) => ipcRenderer.invoke('fs:watchDirectory', dirPath),
+  unwatchDirectory: () => ipcRenderer.invoke('fs:unwatchDirectory'),
+  onDirChanged: (callback) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: { path: string }): void => callback(data)
+    ipcRenderer.on('fs:dirChanged', handler)
+    return () => ipcRenderer.removeListener('fs:dirChanged', handler)
   }
 }
 

@@ -56,7 +56,18 @@ export default function App(): JSX.Element {
     setCurrentDirectory(dirPath)
     const entries = await window.api.readDirectory(dirPath)
     setFileTree(entries)
+    await window.api.watchDirectory(dirPath)
   }, [])
+
+  // Refresh sidebar when files change on disk
+  useEffect(() => {
+    if (!currentDirectory) return
+    const unlisten = window.api.onDirChanged(async () => {
+      const entries = await window.api.readDirectory(currentDirectory)
+      setFileTree(entries)
+    })
+    return unlisten
+  }, [currentDirectory])
 
   const handleFileSelect = useCallback(async (node: FileNode) => {
     if (node.isDirectory) {
@@ -78,8 +89,33 @@ export default function App(): JSX.Element {
     }
   }, [currentDirectory, loadDirectory])
 
+  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (!file) return
+    const filePath = (file as File & { path: string }).path
+    if (!filePath) return
+    const result = await window.api.readFile(filePath)
+    if (result.content !== null) {
+      setOpenFile({ path: filePath, content: result.content })
+      await window.api.watchFile(filePath)
+      if (!currentDirectory) {
+        const parentDir = filePath.replace(/[\\/][^\\/]+$/, '')
+        await loadDirectory(parentDir)
+      }
+    }
+  }, [currentDirectory, loadDirectory])
+
+  const basePath = openFile ? openFile.path.replace(/[\\/][^\\/]+$/, '') : null
+
   return (
-    <div className="app-shell" data-sidebar={sidebarOpen} data-toc={tocOpen}>
+    <div
+      className="app-shell"
+      data-sidebar={sidebarOpen}
+      data-toc={tocOpen}
+      onDrop={handleDrop}
+      onDragOver={(e) => e.preventDefault()}
+    >
       <Toolbar
         theme={theme}
         onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
@@ -107,6 +143,7 @@ export default function App(): JSX.Element {
           {openFile ? (
             <MarkdownViewer
               content={openFile.content}
+              basePath={basePath}
               onHeadingsExtracted={setHeadings}
             />
           ) : (

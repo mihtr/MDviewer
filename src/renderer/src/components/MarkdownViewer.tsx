@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
@@ -9,10 +9,20 @@ import type { Heading } from '../types'
 
 interface MarkdownViewerProps {
   content: string
+  basePath: string | null
   onHeadingsExtracted: (headings: Heading[]) => void
 }
 
-export function MarkdownViewer({ content, onHeadingsExtracted }: MarkdownViewerProps): JSX.Element {
+function resolveImageSrc(src: string | undefined, basePath: string | null): string {
+  if (!src) return ''
+  if (/^(https?|file|data):/.test(src)) return src
+  if (!basePath) return src
+  const base = basePath.replace(/\\/g, '/')
+  const rel = src.replace(/\\/g, '/')
+  return `file:///${base}/${rel}`
+}
+
+export function MarkdownViewer({ content, basePath, onHeadingsExtracted }: MarkdownViewerProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -28,32 +38,35 @@ export function MarkdownViewer({ content, onHeadingsExtracted }: MarkdownViewerP
     onHeadingsExtracted(headings)
   }, [content, onHeadingsExtracted])
 
+  const components = useMemo((): Components => ({
+    a({ href, children, ...props }) {
+      return (
+        <a href={href} target="_blank" rel="noreferrer" {...props}>
+          {children}
+        </a>
+      )
+    },
+    pre({ children, ...props }) {
+      return <CodeBlock preProps={props}>{children}</CodeBlock>
+    },
+    img({ src, alt, ...props }) {
+      return <img src={resolveImageSrc(src, basePath)} alt={alt} style={{ maxWidth: '100%' }} {...props} />
+    }
+  }), [basePath])
+
   return (
     <div className="markdown-scroll">
       <article ref={containerRef} className="markdown-body">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkBreaks]}
           rehypePlugins={[rehypeHighlight, rehypeSlug]}
-          components={mdComponents}
+          components={components}
         >
           {content}
         </ReactMarkdown>
       </article>
     </div>
   )
-}
-
-const mdComponents: Components = {
-  a({ href, children, ...props }) {
-    return (
-      <a href={href} target="_blank" rel="noreferrer" {...props}>
-        {children}
-      </a>
-    )
-  },
-  pre({ children, ...props }) {
-    return <CodeBlock preProps={props}>{children}</CodeBlock>
-  }
 }
 
 function CodeBlock({ children, preProps }: {
